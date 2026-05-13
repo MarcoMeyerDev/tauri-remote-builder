@@ -25,6 +25,10 @@ jobs:
       - name: Install frontend dependencies
         run: npm install
 
+      - name: Generate Tauri icons
+        shell: pwsh
+        run: ./scripts/create-tauri-icons.ps1
+
       - name: Build Tauri executable
         run: npm run tauri build
 
