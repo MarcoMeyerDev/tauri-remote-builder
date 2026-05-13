@@ -11,20 +11,20 @@ function New-AppBitmap {
   $bitmap = New-Object System.Drawing.Bitmap $Size, $Size
   $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
   $graphics.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
-  $graphics.Clear([System.Drawing.Color]::FromArgb(18, 32, 55))
+  $graphics.Clear([System.Drawing.Color]::FromArgb(8, 17, 31))
 
   $rect = New-Object System.Drawing.Rectangle 0, 0, $Size, $Size
   $rectF = New-Object System.Drawing.RectangleF 0, 0, $Size, $Size
-  $brush = New-Object System.Drawing.Drawing2D.LinearGradientBrush $rect, ([System.Drawing.Color]::FromArgb(70, 210, 255)), ([System.Drawing.Color]::FromArgb(34, 104, 255)), 45
+  $brush = New-Object System.Drawing.Drawing2D.LinearGradientBrush $rect, ([System.Drawing.Color]::FromArgb(255, 227, 77)), ([System.Drawing.Color]::FromArgb(98, 216, 255)), 45
   $graphics.FillEllipse($brush, [int]($Size * 0.12), [int]($Size * 0.12), [int]($Size * 0.76), [int]($Size * 0.76))
 
-  $fontSize = [Math]::Max(10, [int]($Size * 0.34))
+  $fontSize = [Math]::Max(10, [int]($Size * 0.32))
   $font = New-Object System.Drawing.Font "Segoe UI", $fontSize, ([System.Drawing.FontStyle]::Bold), ([System.Drawing.GraphicsUnit]::Pixel)
   $format = New-Object System.Drawing.StringFormat
   $format.Alignment = [System.Drawing.StringAlignment]::Center
   $format.LineAlignment = [System.Drawing.StringAlignment]::Center
-  $textBrush = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::White)
-  $graphics.DrawString("TR", $font, $textBrush, $rectF, $format)
+  $textBrush = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(8, 17, 31))
+  $graphics.DrawString("VH", $font, $textBrush, $rectF, $format)
 
   $graphics.Dispose()
   $brush.Dispose()
@@ -66,6 +66,3 @@ $bw.Write([UInt32]22)
 $bw.Write($pngBytes)
 $bw.Dispose()
 $fs.Dispose()
-
-Write-Host "Generated Tauri icons in $iconsDir"
-Get-ChildItem $iconsDir | Select-Object Name, Length

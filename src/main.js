@@ -1,31 +1,33 @@
-import "./styles.css";
 import { invoke } from "@tauri-apps/api/core";
+import "./styles.css";
 
 const app = document.querySelector("#app");
 
 app.innerHTML = `
-  <main class="shell">
-    <section class="panel">
-      <p class="label">Remote Windows build</p>
-      <h1>Tauri is running.</h1>
-      <div class="controls">
-        <input id="name" value="Marco" />
-        <button id="run" type="button">Call Rust</button>
-      </div>
-      <pre id="output">Ready.</pre>
-    </section>
-  </main>
+  <section class="shell">
+    <p class="eyebrow">Vanilla HTML CSS JavaScript</p>
+    <h1>Tauri desktop app</h1>
+    <p class="lede">
+      This frontend is plain HTML, CSS, and JavaScript. The button calls a Rust command through Tauri.
+    </p>
+    <div class="controls">
+      <input id="name" value="Marco" aria-label="Name" />
+      <button id="call-rust">Call Rust backend</button>
+    </div>
+    <pre id="output">Click the button to call Rust.</pre>
+  </section>
 `;
 
-const nameInput = document.querySelector("#name");
-const runButton = document.querySelector("#run");
+const input = document.querySelector("#name");
 const output = document.querySelector("#output");
+const button = document.querySelector("#call-rust");
 
-runButton.addEventListener("click", async () => {
+button.addEventListener("click", async () => {
   output.textContent = "Calling Rust...";
+
   try {
-    const response = await invoke("greet", { name: nameInput.value || "world" });
-    output.textContent = JSON.stringify(response, null, 2);
+    const result = await invoke("greet", { name: input.value.trim() || "friend" });
+    output.textContent = JSON.stringify(result, null, 2);
   } catch (error) {
     output.textContent = String(error);
   }

@@ -1,6 +1,3 @@
-// Prevents an extra console window on Windows in release builds.
-#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-
 fn main() {
-    tauri_remote_builder_lib::run()
+    vanilla_html_css_js_tauri_lib::run();
 }
