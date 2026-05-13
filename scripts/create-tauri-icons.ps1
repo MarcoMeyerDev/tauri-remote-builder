@@ -14,6 +14,7 @@ function New-AppBitmap {
   $graphics.Clear([System.Drawing.Color]::FromArgb(18, 32, 55))
 
   $rect = New-Object System.Drawing.Rectangle 0, 0, $Size, $Size
+  $rectF = New-Object System.Drawing.RectangleF 0, 0, $Size, $Size
   $brush = New-Object System.Drawing.Drawing2D.LinearGradientBrush $rect, ([System.Drawing.Color]::FromArgb(70, 210, 255)), ([System.Drawing.Color]::FromArgb(34, 104, 255)), 45
   $graphics.FillEllipse($brush, [int]($Size * 0.12), [int]($Size * 0.12), [int]($Size * 0.76), [int]($Size * 0.76))
 
@@ -23,7 +24,7 @@ function New-AppBitmap {
   $format.Alignment = [System.Drawing.StringAlignment]::Center
   $format.LineAlignment = [System.Drawing.StringAlignment]::Center
   $textBrush = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::White)
-  $graphics.DrawString("TR", $font, $textBrush, $rect, $format)
+  $graphics.DrawString("TR", $font, $textBrush, $rectF, $format)
 
   $graphics.Dispose()
   $brush.Dispose()
