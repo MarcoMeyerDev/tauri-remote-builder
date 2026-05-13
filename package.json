@@ -1,18 +1,1 @@
-{
-  "name": "tauri-remote-builder",
-  "private": true,
-  "version": "0.1.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "tauri": "tauri"
-  },
-  "dependencies": {
-    "@tauri-apps/api": "^2.8.0"
-  },
-  "devDependencies": {
-    "@tauri-apps/cli": "^2.8.4",
-    "vite": "^7.1.0"
-  }
-}
+{"name":"fancy-todo-tauri","private":true,"version":"0.1.0","type":"module","scripts":{"dev":"vite","build":"vite build","tauri":"tauri"},"dependencies":{"@tauri-apps/api":"^2.8.0"},"devDependencies":{"@tauri-apps/cli":"^2.8.4","vite":"^7.1.0"}}

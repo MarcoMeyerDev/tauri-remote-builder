@@ -1,23 +1,35 @@
-use serde::Serialize;
+#[derive(serde::Deserialize)]
+struct Task {
+    title: String,
+    priority: String,
+}
 
-#[derive(Serialize)]
-struct GreetReply {
+#[derive(serde::Serialize)]
+struct FocusReply {
     message: String,
-    backend: String,
+    picked_title: String,
 }
 
 #[tauri::command]
-fn greet(name: String) -> GreetReply {
-    GreetReply {
-        message: format!("Hello, {name}. This response came from Rust."),
-        backend: "tauri-rust".to_string(),
+fn pick_focus(tasks: Vec<Task>) -> FocusReply {
+    let picked = tasks
+        .iter()
+        .max_by_key(|task| match task.priority.as_str() {
+            "high" => 3,
+            "medium" => 2,
+            _ => 1,
+        })
+        .expect("tasks should not be empty");
+
+    FocusReply {
+        message: format!("Focus next: {}. It has {} priority.", picked.title, picked.priority),
+        picked_title: picked.title.clone(),
     }
 }
 
-#[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![greet])
+        .invoke_handler(tauri::generate_handler![pick_focus])
         .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .expect("error while running Tauri application");
 }

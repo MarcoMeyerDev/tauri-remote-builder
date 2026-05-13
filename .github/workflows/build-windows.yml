@@ -3,7 +3,7 @@ name: Build Windows Tauri exe
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, fancy-todo-tauri]
 
 jobs:
   build-windows:
@@ -13,44 +13,32 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
-
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
-
       - name: Rust cache
         uses: swatinem/rust-cache@v2
         with:
           workspaces: ./src-tauri -> target
-
       - name: Install frontend dependencies
         run: npm install
-
       - name: Generate Tauri icons
         shell: pwsh
         run: ./scripts/create-tauri-icons.ps1
-
       - name: Build with official Tauri action
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Show release outputs
-        shell: pwsh
-        run: Get-ChildItem -Recurse src-tauri/target/release | Select-Object FullName,Length
-
       - name: Package portable exe
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force artifacts
-          Compress-Archive -Path src-tauri/target/release/tauri-remote-builder.exe -DestinationPath artifacts/tauri-remote-builder-windows-exe.zip -Force
-
+          Compress-Archive -Path src-tauri/target/release/fancy-todo-tauri.exe -DestinationPath artifacts/fancy-todo-tauri.exe.zip -Force
       - name: Upload portable exe
         uses: actions/upload-artifact@v4
         with:
-          name: tauri-remote-builder-windows-exe
-          path: artifacts/tauri-remote-builder-windows-exe.zip
+          name: fancy-todo-tauri-exe
+          path: artifacts/fancy-todo-tauri.exe.zip
