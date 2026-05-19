@@ -1,0 +1,60 @@
+name: CodexBox Codex build probe
+
+on:
+  workflow_dispatch:
+    inputs:
+      codex_ref:
+        description: "openai/codex ref to test"
+        required: true
+        default: "rust-v0.131.0-alpha.9"
+      probe:
+        description: "Probe level: home-dir-test or cli-check"
+        required: true
+        default: "home-dir-test"
+        type: choice
+        options:
+          - home-dir-test
+          - cli-check
+
+jobs:
+  probe-windows:
+    name: Windows Codex Rust probe
+    runs-on: windows-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout OpenAI Codex source
+        uses: actions/checkout@v4
+        with:
+          repository: openai/codex
+          ref: ${{ inputs.codex_ref }}
+          path: codex-source
+          persist-credentials: false
+
+      - name: Install Rust 1.93.0
+        uses: dtolnay/rust-toolchain@1.93.0
+
+      - name: Print runner and Rust versions
+        shell: pwsh
+        run: |
+          $computer = Get-CimInstance Win32_ComputerSystem
+          $cpu = Get-CimInstance Win32_Processor | Select-Object -First 1
+          Write-Host "Runner: $env:RUNNER_NAME"
+          Write-Host "OS: $([System.Environment]::OSVersion.VersionString)"
+          Write-Host "CPU: $($cpu.Name)"
+          Write-Host "Logical CPUs: $($computer.NumberOfLogicalProcessors)"
+          rustc --version
+          cargo --version
+
+      - name: Run small home-dir test
+        if: ${{ inputs.probe == 'home-dir-test' }}
+        shell: pwsh
+        working-directory: codex-source/codex-rs
+        run: cargo test -p codex-utils-home-dir
+
+      - name: Run codex-cli check
+        if: ${{ inputs.probe == 'cli-check' }}
+        shell: pwsh
+        working-directory: codex-source/codex-rs
+        run: cargo check -p codex-cli --bin codex
