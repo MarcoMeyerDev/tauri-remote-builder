@@ -35,15 +35,11 @@ jobs:
       - name: Install Rust 1.93.0
         uses: dtolnay/rust-toolchain@1.93.0
 
-      - name: Print runner and Rust versions
+      - name: Print tool versions
         shell: pwsh
         run: |
-          $computer = Get-CimInstance Win32_ComputerSystem
-          $cpu = Get-CimInstance Win32_Processor | Select-Object -First 1
           Write-Host "Runner: $env:RUNNER_NAME"
           Write-Host "OS: $([System.Environment]::OSVersion.VersionString)"
-          Write-Host "CPU: $($cpu.Name)"
-          Write-Host "Logical CPUs: $($computer.NumberOfLogicalProcessors)"
           rustc --version
           cargo --version
 
