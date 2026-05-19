@@ -15,6 +15,7 @@ name: CodexBox Codex build probe
         options:
           - home-dir-test
           - cli-check
+          - patched-debug-build
           - patched-release-build
 
 jobs:
@@ -47,7 +48,7 @@ jobs:
           cargo --version
 
       - name: Patch CodexBox AppContainer home-dir behavior
-        if: ${{ inputs.probe == 'patched-release-build' }}
+        if: ${{ inputs.probe == 'patched-debug-build' || inputs.probe == 'patched-release-build' }}
         shell: pwsh
         run: |
           $path = "codex-source/codex-rs/utils/home-dir/src/lib.rs"
@@ -86,7 +87,7 @@ jobs:
           Select-String -LiteralPath $path -Pattern "CODEXBOX_APPCONTAINER" -Context 2,2
 
       - name: Force state migrations to CRLF for native DB checksum compatibility
-        if: ${{ inputs.probe == 'patched-release-build' }}
+        if: ${{ inputs.probe == 'patched-debug-build' || inputs.probe == 'patched-release-build' }}
         shell: pwsh
         run: |
           $migrationDir = "codex-source/codex-rs/state/migrations"
@@ -113,21 +114,30 @@ jobs:
         working-directory: codex-source/codex-rs
         run: cargo check -p codex-cli --bin codex
 
+      - name: Build patched Codex debug binary
+        if: ${{ inputs.probe == 'patched-debug-build' }}
+        shell: pwsh
+        working-directory: codex-source/codex-rs
+        run: cargo build -p codex-cli --bin codex
+
       - name: Build patched Codex release binary
         if: ${{ inputs.probe == 'patched-release-build' }}
         shell: pwsh
         working-directory: codex-source/codex-rs
-        env:
-          CARGO_PROFILE_RELEASE_LTO: "thin"
         run: cargo build --release -p codex-cli --bin codex
 
       - name: Verify patched Codex artifact
-        if: ${{ inputs.probe == 'patched-release-build' }}
+        if: ${{ inputs.probe == 'patched-debug-build' || inputs.probe == 'patched-release-build' }}
         shell: pwsh
         run: |
-          $exe = "codex-source/codex-rs/target/release/codex.exe"
+          if ("${{ inputs.probe }}" -eq "patched-release-build") {
+            $profile = "release"
+          } else {
+            $profile = "debug"
+          }
+          $exe = "codex-source/codex-rs/target/$profile/codex.exe"
           if (-not (Test-Path -LiteralPath $exe)) {
-            Write-Error "Missing built codex.exe"
+            Write-Error "Missing built codex.exe at $exe"
           }
           & $exe --version
           New-Item -ItemType Directory -Force -Path "artifact" | Out-Null
@@ -135,6 +145,8 @@ jobs:
           $manifest = [ordered]@{
             built_at_utc = (Get-Date).ToUniversalTime().ToString("o")
             codex_ref = "${{ inputs.codex_ref }}"
+            probe = "${{ inputs.probe }}"
+            cargo_profile = $profile
             patch = "CODEXBOX_APPCONTAINER skips CODEX_HOME canonicalize"
             migration_line_endings = "CRLF"
             migration_0001_sha384 = (Get-FileHash -Algorithm SHA384 -LiteralPath "codex-source/codex-rs/state/migrations/0001_threads.sql").Hash
@@ -142,8 +154,8 @@ jobs:
           $manifest | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath "artifact/codexbox-build-manifest.json" -Encoding utf8
 
       - name: Upload patched Codex artifact
-        if: ${{ inputs.probe == 'patched-release-build' }}
+        if: ${{ inputs.probe == 'patched-debug-build' || inputs.probe == 'patched-release-build' }}
         uses: actions/upload-artifact@v4
         with:
-          name: codexbox-codex-${{ inputs.codex_ref }}-windows-x64
+          name: codexbox-codex-${{ inputs.codex_ref }}-${{ inputs.probe }}-windows-x64
           path: artifact
